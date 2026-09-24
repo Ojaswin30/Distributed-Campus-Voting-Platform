@@ -3,19 +3,20 @@ from .database import get_db
 
 def init_db():
     """
-    Initializes SQLite database tables, indexes, and default administrator credentials.
+    Initializes SQLite database tables, indexes, and administrator schemas.
+    All password-based authentication has been removed in favor of Google OAuth verification.
     """
     with get_db() as conn:
         cursor = conn.cursor()
         
-        # 1. Admins Table
+        # 1. Admins Table (Google OAuth based)
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS admins (
                 id TEXT PRIMARY KEY,
-                username TEXT NOT NULL UNIQUE,
-                password_hash TEXT NOT NULL,
+                email TEXT NOT NULL UNIQUE,
                 full_name TEXT,
                 role TEXT DEFAULT 'admin',
+                is_active INTEGER NOT NULL DEFAULT 1,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
         """)
@@ -23,14 +24,35 @@ def init_db():
         # Migration check for existing admins table columns
         cursor.execute("PRAGMA table_info(admins);")
         admin_cols = [r["name"] for r in cursor.fetchall()]
+        if "email" not in admin_cols:
+            cursor.execute("ALTER TABLE admins ADD COLUMN email TEXT;")
         if "full_name" not in admin_cols:
             cursor.execute("ALTER TABLE admins ADD COLUMN full_name TEXT;")
         if "role" not in admin_cols:
             cursor.execute("ALTER TABLE admins ADD COLUMN role TEXT DEFAULT 'admin';")
+        if "is_active" not in admin_cols:
+            cursor.execute("ALTER TABLE admins ADD COLUMN is_active INTEGER DEFAULT 1;")
         if "created_at" not in admin_cols:
             cursor.execute("ALTER TABLE admins ADD COLUMN created_at DATETIME;")
 
-        # 2. Campuses Table
+        # Purge legacy password-only records with no Google email
+        cursor.execute("DELETE FROM admins WHERE email IS NULL OR TRIM(email) = '';")
+
+        # 2. Admin Access Request Tickets Table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS admin_requests (
+                id TEXT PRIMARY KEY,
+                email TEXT NOT NULL,
+                name TEXT NOT NULL,
+                department TEXT,
+                reason TEXT,
+                status TEXT NOT NULL DEFAULT 'pending',
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                reviewed_at DATETIME
+            );
+        """)
+
+        # 3. Campuses Table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS campuses (
                 id TEXT PRIMARY KEY,
@@ -43,7 +65,7 @@ def init_db():
             );
         """)
 
-        # 3. Students Table
+        # 4. Students Table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS students (
                 enrollment_id TEXT PRIMARY KEY,
@@ -55,7 +77,7 @@ def init_db():
             );
         """)
 
-        # 4. Clubs Table
+        # 5. Clubs Table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS clubs (
                 id TEXT PRIMARY KEY,
@@ -67,7 +89,7 @@ def init_db():
             );
         """)
 
-        # 5. Candidates Table
+        # 6. Candidates Table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS candidates (
                 id TEXT PRIMARY KEY,
@@ -80,7 +102,7 @@ def init_db():
             );
         """)
 
-        # 6. Votes Table
+        # 7. Votes Table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS votes (
                 id TEXT PRIMARY KEY,
@@ -99,21 +121,7 @@ def init_db():
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_students_campus ON students(campus);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_clubs_campus ON clubs(campus);")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_campuses_name ON campuses(name);")
-
-        # Default Admin Credentials
-        cursor.execute("SELECT COUNT(*) AS count FROM admins")
-        if cursor.fetchone()["count"] == 0:
-            cursor.execute("INSERT INTO admins (id, username, password_hash, full_name, role) VALUES (?, ?, ?, ?, ?)", 
-                           ("ADM-OFFICER-01", "admin", "admin123", "Chief Election Officer", "admin"))
-            cursor.execute("INSERT INTO admins (id, username, password_hash, full_name, role) VALUES (?, ?, ?, ?, ?)", 
-                           ("ADM-SUPER-01", "superadmin", "supersecret123", "System Administrator", "superadmin"))
-        else:
-            # Ensure unique officer ID ADM-OFFICER-01 exists
-            cursor.execute("SELECT 1 FROM admins WHERE id = 'ADM-OFFICER-01'")
-            if not cursor.fetchone():
-                cursor.execute("""
-                    INSERT OR REPLACE INTO admins (id, username, password_hash, full_name, role) 
-                    VALUES ('ADM-OFFICER-01', 'admin', 'admin123', 'Chief Election Officer', 'admin')
-                """)
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_admins_email ON admins(email);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_admin_requests_email ON admin_requests(email);")
 
         conn.commit()

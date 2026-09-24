@@ -8,7 +8,7 @@ export default function AdminHeader({ adminUser, onSync, onLogout }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <h2 style={{ fontSize: '1.6rem', fontWeight: 700 }}>Admin Operations Console</h2>
           <span style={{ fontSize: '0.75rem', background: 'var(--primary-light)', color: 'var(--primary)', border: '1px solid var(--primary-border)', padding: '3px 8px', borderRadius: 'var(--radius-full)', fontWeight: 700 }}>
-            Officer: {adminUser?.id || 'ADM-OFFICER-01'}
+            Admin: {adminUser?.full_name || adminUser?.email || 'Administrator'}
           </span>
         </div>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>

@@ -1,4 +1,15 @@
-from .admin_repo import authenticate_admin
+from .admin_repo import (
+    get_admin_by_email,
+    get_all_admins,
+    add_admin,
+    update_admin,
+    delete_admin,
+    create_admin_request,
+    get_all_admin_requests,
+    approve_admin_request,
+    reject_admin_request,
+    delete_admin_request,
+)
 from .campus_repo import (
     get_campuses,
     get_campus_by_id,
@@ -42,7 +53,16 @@ from .vote_repo import (
 )
 
 __all__ = [
-    "authenticate_admin",
+    "get_admin_by_email",
+    "get_all_admins",
+    "add_admin",
+    "update_admin",
+    "delete_admin",
+    "create_admin_request",
+    "get_all_admin_requests",
+    "approve_admin_request",
+    "reject_admin_request",
+    "delete_admin_request",
     "get_campuses",
     "get_campus_by_id",
     "add_campus",

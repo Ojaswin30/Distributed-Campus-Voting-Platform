@@ -120,19 +120,19 @@ npm run dev
 
 ---
 
-## 🔐 Default Credentials
+## 🔐 Authentication & Access Control
 
-| Portal | Identifier / Username | Password | Role |
-| :--- | :--- | :--- | :--- |
-| **Admin Console** | `ADM-OFFICER-01` (or `admin`) | `admin123` | Chief Election Officer |
-| **Admin Console** | `ADM-SUPER-01` (or `superadmin`) | `supersecret123` | System Administrator |
-| **Student Portal** | Registered Student Email / ID | Google OAuth 2.0 | Verified Voter |
+- **Students / Voters**: Sign in via **Google OAuth 2.0**. Automatically matches against pre-registered student rosters.
+- **Election Administrators**: Sign in via **Google OAuth 2.0**. Access is verified against approved administrator accounts in SQLite.
+- **Admin Onboarding**: Unregistered faculty can click **"Raise Admin Access Request"** to submit an onboarding ticket.
+- **Superadmin Management Portal** (Port `5174`): Dedicated standalone interface for adding/editing authorized admin Google emails and reviewing access request tickets.
 
 ---
 
 ## 🌐 Endpoints & Ports
 
-- **Frontend Web Application**: [http://localhost:5173](http://localhost:5173)
+- **Main Election Portal**: [http://localhost:5173](http://localhost:5173)
+- **Superadmin Management Portal**: [http://localhost:5174](http://localhost:5174)
 - **FastAPI Backend Server**: [http://127.0.0.1:8000](http://127.0.0.1:8000)
 - **Interactive Swagger Documentation**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 - **Redoc Documentation**: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)

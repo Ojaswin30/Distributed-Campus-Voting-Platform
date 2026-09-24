@@ -1,17 +1,68 @@
-import React, { useState } from 'react';
-import { Vote, Shield, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Vote, Shield, CheckCircle2, UserCheck, LogOut, GraduationCap, School } from 'lucide-react';
+import UnifiedAuthContainer from './components/auth/UnifiedAuthContainer';
 import VoterPortal from './components/VoterPortal';
 import AdminPortal from './components/AdminPortal';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('voter'); // 'voter' | 'admin'
+  // Authentication state: 'unauthenticated' | 'student' | 'teacher'
+  const [adminUser, setAdminUser] = useState(() => {
+    try {
+      const raw = sessionStorage.getItem('adminToken');
+      if (!raw || raw === 'undefined' || raw === 'null') return null;
+      const parsed = JSON.parse(raw);
+      return (parsed && typeof parsed === 'object') ? parsed : null;
+    } catch {
+      sessionStorage.removeItem('adminToken');
+      return null;
+    }
+  });
+
+  const [authMode, setAuthMode] = useState(() => {
+    try {
+      const raw = sessionStorage.getItem('adminToken');
+      if (!raw || raw === 'undefined' || raw === 'null') return 'unauthenticated';
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') return 'teacher';
+      sessionStorage.removeItem('adminToken');
+      return 'unauthenticated';
+    } catch {
+      sessionStorage.removeItem('adminToken');
+      return 'unauthenticated';
+    }
+  });
+
+  const [studentData, setStudentData] = useState(null);
+
+  // Handler for student login success via Google SSO
+  const handleStudentLoginSuccess = (payload) => {
+    setStudentData(payload);
+    setAuthMode('student');
+  };
+
+  // Handler for teacher/admin login success
+  const handleAdminLoginSuccess = (admin) => {
+    setAdminUser(admin);
+    setAuthMode('teacher');
+  };
+
+  // Sign out / return to unified auth container
+  const handleSignOut = () => {
+    sessionStorage.removeItem('adminToken');
+    setStudentData(null);
+    setAdminUser(null);
+    setAuthMode('unauthenticated');
+    if (window.google?.accounts?.id) {
+      window.google.accounts.id.disableAutoSelect();
+    }
+  };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* APP HEADER */}
+    <div className="app-page-layout" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-body)' }}>
+      {/* PERSISTENT STABLE APP HEADER */}
       <header className="app-header">
         <div className="container header-flex">
-          <div className="brand">
+          <div className="brand" style={{ cursor: 'pointer' }} onClick={() => { if (authMode === 'unauthenticated') handleSignOut(); }}>
             <div className="brand-icon">
               <Vote size={26} />
             </div>
@@ -27,38 +78,99 @@ export default function App() {
               Live System Active
             </span>
 
-            {/* Navigation Tabs */}
-            <div className="nav-tabs">
-              <button 
-                className={`nav-tab-btn ${activeTab === 'voter' ? 'active' : ''}`}
-                onClick={() => setActiveTab('voter')}
-              >
-                <Vote size={16} /> Voter Portal
-              </button>
-              <button 
-                className={`nav-tab-btn ${activeTab === 'admin' ? 'active' : ''}`}
-                onClick={() => setActiveTab('admin')}
-              >
-                <Shield size={16} /> Admin Console
-              </button>
-            </div>
+            {/* If authenticated, show user chip & Exit / Log Out button */}
+            {authMode === 'student' && studentData?.student && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ 
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  gap: '6px', 
+                  fontSize: '0.85rem', 
+                  fontWeight: 600, 
+                  background: 'var(--primary-light)', 
+                  color: 'var(--primary)', 
+                  border: '1px solid var(--primary-border)', 
+                  padding: '6px 12px', 
+                  borderRadius: 'var(--radius-full)' 
+                }}>
+                  <GraduationCap size={15} />
+                  {studentData.student.name} ({studentData.campus || studentData.student.campus})
+                </span>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleSignOut}
+                  style={{ fontSize: '0.82rem', padding: '6px 12px' }}
+                  title="Sign out of student account"
+                >
+                  <LogOut size={14} /> Sign Out
+                </button>
+              </div>
+            )}
+
+            {authMode === 'teacher' && adminUser && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ 
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  gap: '6px', 
+                  fontSize: '0.85rem', 
+                  fontWeight: 600, 
+                  background: 'var(--primary-light)', 
+                  color: 'var(--primary)', 
+                  border: '1px solid var(--primary-border)', 
+                  padding: '6px 12px', 
+                  borderRadius: 'var(--radius-full)' 
+                }}>
+                  <School size={15} />
+                  {adminUser.name || 'Officer'} ({adminUser.role || 'Admin'})
+                </span>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleSignOut}
+                  style={{ fontSize: '0.82rem', padding: '6px 12px' }}
+                  title="Log out of election console"
+                >
+                  <LogOut size={14} /> Logout
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </header>
 
-      {/* MAIN CONTENT AREA */}
-      <main className="container" style={{ flex: 1, marginTop: '0.5rem' }}>
-        {activeTab === 'voter' ? (
-          <VoterPortal />
-        ) : (
-          <AdminPortal />
-        )}
+      {/* INDEPENDENTLY SCROLLABLE INNER CONTAINER */}
+      <main className="app-main-content">
+        <div className="app-content-inner">
+          {authMode === 'unauthenticated' && (
+            <UnifiedAuthContainer
+              onStudentLoginSuccess={handleStudentLoginSuccess}
+              onAdminLoginSuccess={handleAdminLoginSuccess}
+            />
+          )}
+
+          {authMode === 'student' && studentData && (
+            <VoterPortal
+              initialStudentProfile={studentData.student}
+              initialBallotClubs={studentData.ballotClubs}
+              onSignOut={handleSignOut}
+            />
+          )}
+
+          {authMode === 'teacher' && (
+            <AdminPortal
+              adminUser={adminUser}
+              onLogout={handleSignOut}
+            />
+          )}
+        </div>
       </main>
 
-      {/* APP FOOTER */}
-      <footer style={{ background: '#ffffff', borderTop: '1px solid var(--border-subtle)', padding: '1.25rem 0', textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-        <div className="container">
-          Secure Multi-Club Election Portal • Powered by Vite, React & Python FastAPI
+      {/* PERSISTENT NON-SCROLLABLE FOOTER */}
+      <footer className="app-footer">
+        <div className="container" style={{ padding: '0 1.25rem' }}>
+          Secure Multi-Club Campus Election Platform • Verified Google Single Sign-On & Immutable Ballot Auditing
         </div>
       </footer>
     </div>

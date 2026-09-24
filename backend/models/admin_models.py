@@ -2,9 +2,28 @@ from typing import Optional, List
 from pydantic import BaseModel
 
 
-class AdminLoginRequest(BaseModel):
-    username: str
-    password: str
+class GoogleAuthRequest(BaseModel):
+    id_token: str
+
+
+class CreateAdminRequestTicket(BaseModel):
+    email: str
+    name: str
+    department: Optional[str] = None
+    reason: Optional[str] = None
+
+
+class AddAdminAccountRequest(BaseModel):
+    email: str
+    full_name: Optional[str] = None
+    role: str = "admin"
+
+
+class UpdateAdminAccountRequest(BaseModel):
+    email: Optional[str] = None
+    full_name: Optional[str] = None
+    role: Optional[str] = None
+    is_active: Optional[int] = None
 
 
 class AddCampusRequest(BaseModel):

@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers.voter import router as voter_router
 from routers.admin import router as admin_router
+from routers.superadmin import router as superadmin_router
 import database as db
 
 app = FastAPI(
@@ -23,6 +24,7 @@ app.add_middleware(
 # Register API Routers
 app.include_router(voter_router)
 app.include_router(admin_router)
+app.include_router(superadmin_router)
 
 
 @app.get("/")

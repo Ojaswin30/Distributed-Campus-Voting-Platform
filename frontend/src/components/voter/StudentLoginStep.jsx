@@ -2,13 +2,9 @@ import React, { useState } from 'react';
 
 export default function StudentLoginStep({
   loading,
-  googleClientId,
-  setGoogleClientId,
   onTriggerGoogleSignIn,
   googleBtnRef
 }) {
-  const [showConfig, setShowConfig] = useState(false);
-
   return (
     <div className="clean-card" style={{ maxWidth: '480px', margin: '2rem auto', textAlign: 'center', padding: '2.5rem 2rem' }}>
       <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', border: '1.5px solid var(--primary-border)' }}>
@@ -75,34 +71,6 @@ export default function StudentLoginStep({
           <span>{loading ? 'Signing in...' : 'Sign in with Google'}</span>
         </button>
       </div>
-
-      <div style={{ marginTop: '2rem', borderTop: '1px solid var(--border-subtle)', paddingTop: '1rem', display: 'flex', justifyContent: 'center' }}>
-        <button 
-          type="button" 
-          className="btn btn-secondary"
-          style={{ fontSize: '0.75rem', padding: '2px 8px', color: 'var(--text-muted)' }}
-          onClick={() => setShowConfig(!showConfig)}
-        >
-          ⚙️ Google Client ID Settings
-        </button>
-      </div>
-
-      {showConfig && (
-        <div style={{ marginTop: '0.75rem', padding: '0.85rem', background: 'var(--bg-surface-subtle)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)', textAlign: 'left' }}>
-          <label className="form-label" style={{ fontSize: '0.8rem' }}>Google OAuth 2.0 Client ID:</label>
-          <input 
-            type="text" 
-            className="form-control" 
-            value={googleClientId}
-            onChange={(e) => {
-              setGoogleClientId(e.target.value);
-              try { localStorage.setItem('google_client_id', e.target.value); } catch {}
-            }}
-            placeholder="e.g. 1008719970978-xxx.apps.googleusercontent.com"
-            style={{ fontSize: '0.82rem' }}
-          />
-        </div>
-      )}
     </div>
   );
 }

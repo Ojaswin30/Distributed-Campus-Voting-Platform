@@ -13,15 +13,14 @@ export default function FloatingVoteBar({
 
   return (
     <div style={{
-      position: 'fixed',
+      position: 'sticky',
       bottom: 0,
-      left: 0,
-      right: 0,
       background: '#ffffff',
       borderTop: '1px solid var(--border-medium)',
       padding: '1rem 1.5rem',
-      boxShadow: 'var(--shadow-float)',
-      zIndex: 90
+      boxShadow: '0 -4px 16px rgba(0,0,0,0.08)',
+      zIndex: 40,
+      marginTop: '2rem'
     }}>
       <div className="container" style={{ padding: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>

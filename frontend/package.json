@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "superadmin": "vite --config vite.superadmin.config.js",
     "build": "vite build",
     "preview": "vite preview"
   },

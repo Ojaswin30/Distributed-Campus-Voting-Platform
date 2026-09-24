@@ -66,7 +66,7 @@ def main():
     )
     processes.append(backend_proc)
 
-    # Start Vite Frontend
+    # Start Vite Frontend (Main Portal on port 5173)
     npm_cmd = "npm.cmd" if sys.platform == "win32" else "npm"
     frontend_proc = subprocess.Popen(
         [npm_cmd, "run", "dev"],
@@ -74,25 +74,41 @@ def main():
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
-        bufsize=1
+        bufsize=1,
+        shell=(sys.platform == "win32")
     )
     processes.append(frontend_proc)
+
+    # Start Superadmin Management Portal (on port 5174)
+    superadmin_proc = subprocess.Popen(
+        [npm_cmd, "run", "superadmin"],
+        cwd=FRONTEND_DIR,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,
+        shell=(sys.platform == "win32")
+    )
+    processes.append(superadmin_proc)
 
     # Stream logs in background threads
     t_backend = threading.Thread(target=stream_logs, args=(backend_proc, "BACKEND", "\033[1;34m"), daemon=True)
     t_frontend = threading.Thread(target=stream_logs, args=(frontend_proc, "FRONTEND", "\033[1;32m"), daemon=True)
+    t_superadmin = threading.Thread(target=stream_logs, args=(superadmin_proc, "SUPERADMIN", "\033[1;35m"), daemon=True)
     t_backend.start()
     t_frontend.start()
+    t_superadmin.start()
 
     print("\033[1;32m[READY] Services launched:\033[0m")
-    print("  -> Backend API : http://127.0.0.1:8000")
-    print("  -> API Docs    : http://127.0.0.1:8000/docs")
-    print("  -> Frontend App: http://localhost:5173")
-    print("\n\033[90m(Press Ctrl+C at any time to terminate both services)\033[0m\n")
+    print("  -> Backend API        : http://127.0.0.1:8000")
+    print("  -> API Docs           : http://127.0.0.1:8000/docs")
+    print("  -> Main Election App  : http://localhost:5173")
+    print("  -> Superadmin Portal  : http://localhost:5174")
+    print("\n\033[90m(Press Ctrl+C at any time to terminate all services)\033[0m\n")
 
     while True:
         time.sleep(1)
-        if backend_proc.poll() is not None or frontend_proc.poll() is not None:
+        if backend_proc.poll() is not None or frontend_proc.poll() is not None or superadmin_proc.poll() is not None:
             shutdown()
 
 if __name__ == "__main__":

@@ -23,22 +23,26 @@ import AddCandidateModal from './admin/modals/AddCandidateModal';
 import AddStudentModal from './admin/modals/AddStudentModal';
 import BulkUploadModal from './admin/modals/BulkUploadModal';
 
-export default function AdminPortal() {
-  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => {
-    return Boolean(sessionStorage.getItem('adminToken'));
-  });
-
+export default function AdminPortal({
+  adminUser: initialAdminUser = null,
+  onLogout: onParentLogout = null
+}) {
   const [adminUser, setAdminUser] = useState(() => {
+    if (initialAdminUser) return initialAdminUser;
     try {
-      return JSON.parse(sessionStorage.getItem('adminToken')) || null;
+      const raw = sessionStorage.getItem('adminToken');
+      if (!raw || raw === 'undefined' || raw === 'null') return null;
+      const parsed = JSON.parse(raw);
+      return (parsed && typeof parsed === 'object') ? parsed : null;
     } catch {
       return null;
     }
   });
 
-  // Login form state
-  const [loginUsername, setLoginUsername] = useState('ADM-OFFICER-01');
-  const [loginPassword, setLoginPassword] = useState('admin123');
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => {
+    return Boolean(initialAdminUser || adminUser);
+  });
+
   const [loginError, setLoginError] = useState('');
 
   // Active Admin Sub-tab
@@ -113,16 +117,15 @@ export default function AdminPortal() {
     setTimeout(() => setAlert(null), 4000);
   };
 
-  // Login handler
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  // Google Login handler
+  const handleGoogleLogin = async (credential) => {
     setLoginError('');
     setLoading(true);
 
     try {
-      const data = await adminApi.login(loginUsername.trim(), loginPassword.trim());
+      const data = await adminApi.googleLogin(credential);
       if (!data.success) {
-        setLoginError(data.detail || 'Invalid Admin ID or password.');
+        setLoginError(data.detail || 'Google administrator authorization failed.');
         setLoading(false);
         return;
       }
@@ -131,7 +134,7 @@ export default function AdminPortal() {
       setAdminUser(data.admin);
       setIsAdminLoggedIn(true);
     } catch (err) {
-      setLoginError(err.message || 'Error connecting to backend API.');
+      setLoginError(err.message || 'Error authenticating admin via Google.');
     } finally {
       setLoading(false);
     }
@@ -142,6 +145,9 @@ export default function AdminPortal() {
     sessionStorage.removeItem('adminToken');
     setAdminUser(null);
     setIsAdminLoggedIn(false);
+    if (onParentLogout) {
+      onParentLogout();
+    }
   };
 
   // Campus handlers
@@ -366,13 +372,9 @@ export default function AdminPortal() {
   if (!isAdminLoggedIn) {
     return (
       <AdminLogin
-        loginUsername={loginUsername}
-        setLoginUsername={setLoginUsername}
-        loginPassword={loginPassword}
-        setLoginPassword={setLoginPassword}
+        onGoogleAdminLogin={handleGoogleLogin}
         loginError={loginError}
         loading={loading}
-        onLogin={handleLogin}
       />
     );
   }

@@ -7,6 +7,12 @@ export const adminApi = {
       body: { username, password }
     }),
 
+  googleLogin: (idToken) =>
+    apiClient('/api/admin/google-login', {
+      method: 'POST',
+      body: { id_token: idToken }
+    }),
+
   getDashboardData: (campus = '') => {
     const query = campus ? `?campus=${encodeURIComponent(campus)}` : '';
     return apiClient(`/api/admin/dashboard-data${query}`);

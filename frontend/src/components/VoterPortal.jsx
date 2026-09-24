@@ -11,14 +11,18 @@ import VoteReviewModal from './voter/VoteReviewModal';
 import VoteReceiptStep from './voter/VoteReceiptStep';
 import AlertBanner from './common/AlertBanner';
 
-export default function VoterPortal() {
+export default function VoterPortal({ 
+  initialStudentProfile = null, 
+  initialBallotClubs = [],
+  onSignOut: onParentSignOut = null
+}) {
   // Wizard steps: 1 = Login, 2 = Campus Ballot, 3 = Receipt
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(initialStudentProfile ? 2 : 1);
   
   // Authenticated Student Profile & Campus Ballot
-  const [studentProfile, setStudentProfile] = useState(null); 
-  const [ballotClubs, setBallotClubs] = useState([]);
-  const [voterEmail, setVoterEmail] = useState('');
+  const [studentProfile, setStudentProfile] = useState(initialStudentProfile); 
+  const [ballotClubs, setBallotClubs] = useState(initialBallotClubs);
+  const [voterEmail, setVoterEmail] = useState(initialStudentProfile?.email || '');
 
   // Selected candidates mapping: { [club_id]: candidate_id }
   const [selections, setSelections] = useState({});
@@ -227,6 +231,9 @@ export default function VoterPortal() {
     setCurrentStep(1);
     if (window.google?.accounts?.id) {
       window.google.accounts.id.disableAutoSelect();
+    }
+    if (onParentSignOut) {
+      onParentSignOut();
     }
   };
 

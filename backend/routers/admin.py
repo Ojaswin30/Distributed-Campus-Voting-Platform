@@ -2,7 +2,7 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, status, Query
 
 from models.admin_models import (
-    AdminLoginRequest,
+    GoogleAuthRequest,
     AddCampusRequest,
     UpdateCampusRequest,
     AddClubRequest,
@@ -11,44 +11,43 @@ from models.admin_models import (
     BulkStudentUploadRequest,
     AddCandidateRequest,
 )
+from services.google_auth_service import verify_google_id_token
 import repositories as db
 
 router = APIRouter(prefix="/api/admin", tags=["Admin"])
 
 
 # ============================================================================
-# ADMIN AUTHENTICATION
+# ADMIN AUTHENTICATION (GOOGLE OAUTH ONLY)
 # ============================================================================
 
-@router.post("/login")
-def admin_login(req: AdminLoginRequest):
+@router.post("/google-login")
+def admin_google_login(req: GoogleAuthRequest):
     """
-    Authenticate election admin credentials against SQLite database.
-    Strictly isolated from student logins.
+    Authenticate election admin/faculty via verified Google OAuth ID Token.
+    Checks if the Google account email is an authorized election officer/administrator in SQLite.
     """
-    if not req.username or not req.password:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Admin Officer ID / Username and password are required."
-        )
-
-    admin = db.authenticate_admin(req.username, req.password)
+    token_data = verify_google_id_token(req.id_token)
+    email = token_data.get("email", "").lower()
+    
+    admin = db.get_admin_by_email(email)
     if not admin:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid Admin ID or password. Access is strictly restricted to designated Election Officers."
+            detail=f"Google account '{email}' is not authorized as an Election Administrator. Please submit an Admin Request or sign in with an authorized account."
         )
 
     return {
         "success": True,
-        "message": f"Welcome, {admin['full_name'] or admin['username']}!",
+        "message": f"Welcome, {admin.get('full_name') or email}!",
         "admin": {
             "id": admin["id"],
-            "username": admin["username"],
-            "full_name": admin["full_name"],
-            "role": admin["role"]
+            "email": admin["email"],
+            "full_name": admin.get("full_name") or email.split('@')[0].title(),
+            "role": admin.get("role", "admin")
         }
     }
+
 
 
 # ============================================================================
