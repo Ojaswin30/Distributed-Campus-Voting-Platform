@@ -1,0 +1,21 @@
+{
+  "name": "election-voting-app",
+  "version": "1.0.0",
+  "description": "Secure Election Voting Web Application with Dual Photo Verification & Role-Based Portals",
+  "main": "server.js",
+  "scripts": {
+    "start": "python start.py",
+    "dev": "npm --prefix frontend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build:frontend": "npm --prefix frontend run build",
+    "start:backend": "cd backend && uvicorn main:app --reload --port 8000"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^13.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1"
+  }
+}
