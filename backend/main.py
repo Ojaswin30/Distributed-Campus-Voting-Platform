@@ -1,4 +1,12 @@
 import os
+import sys
+from pathlib import Path
+
+# Ensure backend directory is in sys.path for cloud deployments (e.g. Render / Docker)
+_backend_dir = str(Path(__file__).resolve().parent)
+if _backend_dir not in sys.path:
+    sys.path.insert(0, _backend_dir)
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers.voter import router as voter_router
