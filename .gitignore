@@ -1,28 +1,10 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+# ==============================================================================
+# Campus Digital Voting Platform - Git Ignore Configuration
+# ==============================================================================
 
-# OS Files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Node.js / Frontend
-node_modules/
-dist/
-dist-ssr/
-*.local
-
-# Environment variables (Never commit real .env files)
+# ------------------------------------------------------------------------------
+# Environment Variables & Secrets (CRITICAL: Never commit credentials)
+# ------------------------------------------------------------------------------
 .env
 .env.*
 *.env
@@ -31,15 +13,62 @@ dist-ssr/
 !.env.example
 !**/.env.example
 
-# Python
+# ------------------------------------------------------------------------------
+# Local Databases & Persistent Storage
+# ------------------------------------------------------------------------------
+data/
+*.db
+*.db3
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+
+# ------------------------------------------------------------------------------
+# Build Outputs & Packaging Artifacts
+# ------------------------------------------------------------------------------
+dist/
+dist_frontend/
+build/
+build_obf/
+obf/
+dist_obf/
+pyarmor_runtime_*
+*.exe
+*.pkg
+*.pyz
+
+# ------------------------------------------------------------------------------
+# Node.js / Frontend
+# ------------------------------------------------------------------------------
+node_modules/
+frontend/node_modules/
+frontend/dist/
+dist-ssr/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.npm/
+
+# ------------------------------------------------------------------------------
+# Python Virtual Environments & Bytecode
+# ------------------------------------------------------------------------------
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
 __pycache__/
+**/*/__pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -54,25 +83,47 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+.pytest_cache/
+.coverage
+htmlcov/
 
-# Virtual Environments
-.venv/
-venv/
-ENV/
-env/
-env.bak/
-venv.bak/
-
-# Editor / IDE
+# ------------------------------------------------------------------------------
+# IDEs, Editors & Tooling
+# ------------------------------------------------------------------------------
 .vscode/
 .idea/
+*.sublime-project
+*.sublime-workspace
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+.gemini/
+.system_generated/
 
-# SQLite Temporary / WAL Files
-data/*.db-journal
-data/*.db-wal
-data/*.db-shm
+# ------------------------------------------------------------------------------
+# Operating System Files
+# ------------------------------------------------------------------------------
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+desktop.ini
+$RECYCLE.BIN/
+
+# ------------------------------------------------------------------------------
+# Logs & Temporary Files
+# ------------------------------------------------------------------------------
+logs/
+*.log
+tmp/
+temp/

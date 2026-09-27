@@ -23,8 +23,6 @@ import {
 import { superadminApi } from './api/superadminApi';
 import AlertBanner from './components/common/AlertBanner';
 
-const DEFAULT_CLIENT_ID = '374708726653-rl5217itnoic8sdm0ql2952ggqpn7qtv.apps.googleusercontent.com';
-
 export default function SuperadminApp() {
   const [activeTab, setActiveTab] = useState('admins'); // 'admins' | 'requests' | 'settings'
   const [admins, setAdmins] = useState([]);
@@ -48,9 +46,9 @@ export default function SuperadminApp() {
   // Google OAuth Settings State
   const [googleClientId, setGoogleClientId] = useState(() => {
     try {
-      return localStorage.getItem('google_client_id') || import.meta.env.VITE_GOOGLE_CLIENT_ID || DEFAULT_CLIENT_ID;
+      return localStorage.getItem('google_client_id') || import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
     } catch {
-      return import.meta.env.VITE_GOOGLE_CLIENT_ID || DEFAULT_CLIENT_ID;
+      return import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
     }
   });
 
@@ -74,10 +72,11 @@ export default function SuperadminApp() {
   };
 
   const handleResetClientId = () => {
-    setGoogleClientId(DEFAULT_CLIENT_ID);
+    const envClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+    setGoogleClientId(envClientId);
     try {
-      localStorage.setItem('google_client_id', DEFAULT_CLIENT_ID);
-      triggerAlert('success', '✓ Reset Google OAuth Client ID to default.');
+      localStorage.setItem('google_client_id', envClientId);
+      triggerAlert('success', '✓ Reset Google OAuth Client ID to .env configuration.');
     } catch {}
   };
 
@@ -311,7 +310,7 @@ export default function SuperadminApp() {
                 className={`nav-tab-btn ${activeTab === 'settings' ? 'active' : ''}`}
                 onClick={() => setActiveTab('settings')}
               >
-                <Settings size={15} /> ⚙️ Google OAuth Settings
+                <Settings size={15} /> Google OAuth Settings
               </button>
             </div>
 
@@ -585,7 +584,7 @@ export default function SuperadminApp() {
                     className="form-control"
                     value={googleClientId}
                     onChange={(e) => setGoogleClientId(e.target.value)}
-                    placeholder="e.g. 374708726653-rl5217itnoic8sdm0ql2952ggqpn7qtv.apps.googleusercontent.com"
+                    placeholder="e.g. your-google-client-id.apps.googleusercontent.com"
                     style={{ fontSize: '0.85rem', fontFamily: 'monospace', padding: '8px 12px' }}
                     required
                   />

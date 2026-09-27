@@ -14,5 +14,13 @@ export default defineConfig({
         changeOrigin: true
       }
     }
+  },
+  build: {
+    rollupOptions: {
+      input: {
+        main: 'index.html',
+        superadmin: 'superadmin.html'
+      }
+    }
   }
 });

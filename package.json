@@ -8,6 +8,8 @@
     "dev": "npm --prefix frontend run dev",
     "dev:frontend": "npm --prefix frontend run dev",
     "build:frontend": "npm --prefix frontend run build",
+    "build:exe": "python drivers/build_app.py",
+    "build:all": "build.bat",
     "start:backend": "cd backend && uvicorn main:app --reload --port 8000"
   },
   "dependencies": {

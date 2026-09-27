@@ -10,7 +10,13 @@ export default function AdminLogin({
   loading
 }) {
   const googleBtnRef = useRef(null);
-  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+  const googleClientId = (() => {
+    try {
+      return localStorage.getItem('google_client_id') || import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+    } catch {
+      return import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+    }
+  })();
 
   // Access Request Modal State
   const [showRequestModal, setShowRequestModal] = useState(false);
