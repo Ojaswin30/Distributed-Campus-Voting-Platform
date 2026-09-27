@@ -35,7 +35,7 @@ app.include_router(admin_router)
 app.include_router(superadmin_router)
 
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 def root_endpoint():
     return {
         "status": "online",
