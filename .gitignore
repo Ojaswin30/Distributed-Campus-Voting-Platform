@@ -26,6 +26,17 @@ data/
 *.db-shm
 
 # ------------------------------------------------------------------------------
+# Build Scripts, Specs & Packaging Drivers (Local Desktop Packaging Only)
+# ------------------------------------------------------------------------------
+build.bat
+build_frontend.bat
+drivers/
+*.spec
+CampusVotingPlatform.spec
+app_launcher.py
+app_config.json
+
+# ------------------------------------------------------------------------------
 # Build Outputs & Packaging Artifacts
 # ------------------------------------------------------------------------------
 dist/

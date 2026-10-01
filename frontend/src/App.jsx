@@ -123,7 +123,7 @@ export default function App() {
                   borderRadius: 'var(--radius-full)' 
                 }}>
                   <School size={15} />
-                  {adminUser.name || 'Officer'} ({adminUser.role || 'Admin'})
+                  {adminUser.full_name || adminUser.name || adminUser.email || 'Officer'} ({adminUser.role || 'Admin'})
                 </span>
                 <button
                   type="button"

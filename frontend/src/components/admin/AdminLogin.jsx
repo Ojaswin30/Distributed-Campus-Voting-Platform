@@ -18,6 +18,9 @@ export default function AdminLogin({
     }
   })();
 
+  // Direct Email Fallback Input State
+  const [directEmail, setDirectEmail] = useState('');
+
   // Access Request Modal State
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [reqEmail, setReqEmail] = useState('');
@@ -32,6 +35,17 @@ export default function AdminLogin({
     setTimeout(() => setAlert(null), 4000);
   };
 
+  const handleDirectEmailSubmit = (e) => {
+    e.preventDefault();
+    if (!directEmail.trim()) {
+      triggerAlert('error', 'Please enter your registered officer email.');
+      return;
+    }
+    if (onGoogleAdminLogin) {
+      onGoogleAdminLogin(`dev:${directEmail.trim().toLowerCase()}`);
+    }
+  };
+
   useEffect(() => {
     if (window.google?.accounts?.id && googleBtnRef.current) {
       try {
@@ -44,16 +58,19 @@ export default function AdminLogin({
           },
           auto_select: false,
           cancel_on_tap_outside: true,
+          context: 'signin',
+          use_fedcm_for_prompt: false,
+          itp_support: true,
         });
 
         googleBtnRef.current.innerHTML = '';
         window.google.accounts.id.renderButton(googleBtnRef.current, {
           theme: 'filled_blue',
-          size: 'medium',
+          size: 'large',
           shape: 'rectangular',
           text: 'signin_with',
           logo_alignment: 'left',
-          width: 260,
+          width: 280,
         });
       } catch (e) {
         console.warn('Google Identity Services warning:', e);
@@ -118,6 +135,32 @@ export default function AdminLogin({
 
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', margin: '1.25rem 0' }}>
         <div ref={googleBtnRef} style={{ minHeight: '38px' }} />
+      </div>
+
+      {/* Direct Officer Email Verification Form */}
+      <div style={{ margin: '0.85rem 0', padding: '0.85rem', background: 'var(--bg-surface-subtle)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.5rem' }}>
+          ── OR SIGN IN WITH AUTHORIZED OFFICER EMAIL ──
+        </div>
+        <form onSubmit={handleDirectEmailSubmit} style={{ display: 'flex', gap: '6px' }}>
+          <input
+            type="email"
+            className="form-control"
+            placeholder="e.g. officer.email@campus.edu"
+            value={directEmail}
+            onChange={(e) => setDirectEmail(e.target.value)}
+            style={{ fontSize: '0.82rem', padding: '7px 10px', flex: 1 }}
+            required
+          />
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={loading}
+            style={{ fontSize: '0.82rem', padding: '7px 12px', whiteSpace: 'nowrap' }}
+          >
+            {loading ? 'Verifying...' : 'Login ➔'}
+          </button>
+        </form>
       </div>
 
       <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid var(--border-subtle)' }}>
